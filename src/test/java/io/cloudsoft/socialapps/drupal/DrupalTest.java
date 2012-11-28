@@ -44,20 +44,20 @@ public class DrupalTest {
         Map mysqlConf = MutableMap.of("creationScriptContents", SCRIPT);
         MySqlNode mySqlNode = new MySqlNode(mysqlConf, app);
 
-        brooklyn.entity.webapp.drupal.Drupal drupal = new brooklyn.entity.webapp.drupal.Drupal(app);
-        drupal.setConfig(brooklyn.entity.webapp.drupal.Drupal.DATABASE_HOST, "127.0.0.1");
-        drupal.setConfig(brooklyn.entity.webapp.drupal.Drupal.DATABASE_SCHEMA, "drupal");
-        drupal.setConfig(brooklyn.entity.webapp.drupal.Drupal.DATABASE_USER, "drupal");
-        drupal.setConfig(brooklyn.entity.webapp.drupal.Drupal.DATABASE_PORT, DependentConfiguration.attributeWhenReady(mySqlNode, MySqlNode.MYSQL_PORT));
-        drupal.setConfig(brooklyn.entity.webapp.drupal.Drupal.DATABASE_PASSWORD, "password");
-        drupal.setConfig(brooklyn.entity.webapp.drupal.Drupal.ADMIN_EMAIL, "alarmnummer@gmail.com");
-        drupal.setConfig(brooklyn.entity.webapp.drupal.Drupal.DATABASE_UP, DependentConfiguration.attributeWhenReady(mySqlNode, MySqlNode.SERVICE_UP));
+       Drupal  drupal = new Drupal(app);
+        drupal.setConfig(Drupal.DATABASE_HOST, "127.0.0.1");
+        drupal.setConfig(Drupal.DATABASE_SCHEMA, "drupal");
+        drupal.setConfig(Drupal.DATABASE_USER, "drupal");
+        drupal.setConfig(Drupal.DATABASE_PORT, DependentConfiguration.attributeWhenReady(mySqlNode, MySqlNode.MYSQL_PORT));
+        drupal.setConfig(Drupal.DATABASE_PASSWORD, "password");
+        drupal.setConfig(Drupal.ADMIN_EMAIL, "alarmnummer@gmail.com");
+        drupal.setConfig(Drupal.DATABASE_UP, DependentConfiguration.attributeWhenReady(mySqlNode, MySqlNode.SERVICE_UP));
 
         Entities.startManagement(app);
 
         app.start(Arrays.asList(location));
 
-        HttpTestUtils.assertContentEventuallyContainsText("http://" + drupal.getAttribute(brooklyn.entity.webapp.drupal.Drupal.HOSTNAME) + "/index.php", "Welcome");
+        HttpTestUtils.assertContentEventuallyContainsText("http://" + drupal.getAttribute(Drupal.HOSTNAME) + "/index.php", "Welcome");
     }
 }
 
