@@ -15,13 +15,9 @@ test-output/
 .classpath
 .settings/
 .metadata/
-
 .idea/
 *.iml
-
 prodDb.*
-
 *.log
-brooklyn*.log.*
-
+*.log.*
 ignored

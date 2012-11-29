@@ -19,7 +19,7 @@ public class Drupal extends SoftwareProcessEntity {
             new BasicConfigKey<String>(SoftwareProcessEntity.SUGGESTED_VERSION, "7.17");
 
     public static final BasicConfigKey<Boolean> DATABASE_UP =
-            new BasicConfigKey<Boolean>(Boolean.class, "database.up", "");
+            new BasicConfigKey<Boolean>(Boolean.class, "database.up", "",true);
 
     @SetFromFlag("databaseDriver")
     public static final BasicConfigKey<String> DATABASE_DRIVER =

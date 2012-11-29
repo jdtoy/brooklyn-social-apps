@@ -50,7 +50,7 @@ public class DrupalTest {
         drupal.setConfig(Drupal.DATABASE_USER, "drupal");
         drupal.setConfig(Drupal.DATABASE_PORT, DependentConfiguration.attributeWhenReady(mySqlNode, MySqlNode.MYSQL_PORT));
         drupal.setConfig(Drupal.DATABASE_PASSWORD, "password");
-        drupal.setConfig(Drupal.ADMIN_EMAIL, "alarmnummer@gmail.com");
+        drupal.setConfig(Drupal.ADMIN_EMAIL, "foo@bar.com");
         drupal.setConfig(Drupal.DATABASE_UP, DependentConfiguration.attributeWhenReady(mySqlNode, MySqlNode.SERVICE_UP));
 
         Entities.startManagement(app);
