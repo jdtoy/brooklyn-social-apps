@@ -1,8 +1,14 @@
 package io.cloudsoft.socialapps.drupal.examples;
 
 import static java.util.Arrays.asList;
+
+import brooklyn.launcher.BrooklynServerDetails;
+import brooklyn.util.CommandLineUtil;
 import io.cloudsoft.socialapps.drupal.Drupal;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -49,9 +55,13 @@ public class BasicDrupalApp extends AbstractApplication {
     }
 
     // can start in AWS by running this -- or use brooklyn CLI/REST for most clouds, or programmatic/config for set of fixed IP machines
-    public static void main(String[] args) throws Exception {
-        BasicDrupalApp app = new BasicDrupalApp();
-        BrooklynLauncher.manage(app, 8081);
+    public static void main(String[] argsv) throws Exception {
+        ClusteredDrupalApp app = new ClusteredDrupalApp();
+        List<String> args = new ArrayList<String>(Arrays.asList(argsv));
+        BrooklynServerDetails server = BrooklynLauncher.newLauncher().
+                webconsolePort(CommandLineUtil.getCommandLineOption(args, "--port", "8081+")).
+                managing(app).
+                launch();
 
         BrooklynProperties brooklynProperties = BrooklynProperties.Factory.newDefault();
         //brooklynProperties.put("brooklyn.jclouds.aws-ec2.image-name-regex","ubuntu-oneiric");
