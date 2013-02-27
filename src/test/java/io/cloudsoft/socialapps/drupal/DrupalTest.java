@@ -10,11 +10,13 @@ import org.testng.annotations.Test;
 
 import brooklyn.entity.basic.Entities;
 import brooklyn.entity.database.mysql.MySqlNode;
+import brooklyn.entity.database.mysql.MySqlNodeImpl;
 import brooklyn.event.basic.DependentConfiguration;
 import brooklyn.location.Location;
 import brooklyn.management.ManagementContext;
 import brooklyn.test.HttpTestUtils;
 import brooklyn.test.entity.TestApplication;
+import brooklyn.test.entity.TestApplicationImpl;
 import brooklyn.util.MutableMap;
 
 public class DrupalTest {
@@ -30,7 +32,7 @@ public class DrupalTest {
 
     @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        app = new TestApplication();
+        app = new TestApplicationImpl();
     }
 
     @AfterMethod(alwaysRun = true)
@@ -42,7 +44,7 @@ public class DrupalTest {
     public void test() {
 
         Map mysqlConf = MutableMap.of("creationScriptContents", SCRIPT);
-        MySqlNode mySqlNode = new MySqlNode(mysqlConf, app);
+        MySqlNodeImpl mySqlNode = new MySqlNodeImpl(mysqlConf, app);
         mySqlNode.setConfig(MySqlNode.SUGGESTED_VERSION, "5.5.29");
 
         Drupal  drupal = new Drupal(app);

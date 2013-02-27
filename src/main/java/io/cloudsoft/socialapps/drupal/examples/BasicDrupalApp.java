@@ -11,11 +11,12 @@ import org.slf4j.LoggerFactory;
 import brooklyn.config.BrooklynProperties;
 import brooklyn.entity.basic.AbstractApplication;
 import brooklyn.entity.database.mysql.MySqlNode;
+import brooklyn.entity.database.mysql.MySqlNodeImpl;
 import brooklyn.event.basic.DependentConfiguration;
 import brooklyn.launcher.BrooklynLauncher;
 import brooklyn.location.basic.LocationRegistry;
 import brooklyn.location.basic.SshMachineLocation;
-import brooklyn.location.basic.jclouds.JcloudsLocation;
+import brooklyn.location.jclouds.JcloudsLocation;
 import brooklyn.util.MutableMap;
 
 /**
@@ -32,11 +33,11 @@ public class BasicDrupalApp extends AbstractApplication {
             "FLUSH PRIVILEGES;";
 
     private Drupal drupal;
-    private MySqlNode mySqlNode;
+    private MySqlNodeImpl mySqlNode;
 
     public BasicDrupalApp() {
         Map mysqlConf = MutableMap.of("creationScriptContents", SCRIPT);
-        mySqlNode = new MySqlNode(mysqlConf, this);
+        mySqlNode = new MySqlNodeImpl(mysqlConf, this);
         mySqlNode.setConfig(MySqlNode.SUGGESTED_VERSION, "5.5.29");
 
         drupal = new Drupal(this);

@@ -1,24 +1,25 @@
 package io.cloudsoft.socialapps.drupal;
 
 
-import brooklyn.entity.Entity;
-import brooklyn.entity.basic.SoftwareProcessEntity;
-import brooklyn.entity.webapp.WebAppService;
-import brooklyn.event.adapter.FunctionSensorAdapter;
-import brooklyn.event.basic.BasicConfigKey;
-import brooklyn.util.MutableMap;
-import brooklyn.util.flags.SetFromFlag;
 import groovy.time.TimeDuration;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Drupal extends SoftwareProcessEntity {
+import brooklyn.entity.Entity;
+import brooklyn.entity.basic.SoftwareProcess;
+import brooklyn.entity.basic.SoftwareProcessImpl;
+import brooklyn.event.adapter.FunctionSensorAdapter;
+import brooklyn.event.basic.BasicConfigKey;
+import brooklyn.util.MutableMap;
+import brooklyn.util.flags.SetFromFlag;
+
+public class Drupal extends SoftwareProcessImpl {
 
     @SetFromFlag("version")
     public static final BasicConfigKey<String> SUGGESTED_VERSION =
-            new BasicConfigKey<String>(SoftwareProcessEntity.SUGGESTED_VERSION, "7.17");
+            new BasicConfigKey<String>(SoftwareProcess.SUGGESTED_VERSION, "7.17");
 
     public static final BasicConfigKey<Boolean> DATABASE_UP =
             new BasicConfigKey<Boolean>(Boolean.class, "database.up", "",true);

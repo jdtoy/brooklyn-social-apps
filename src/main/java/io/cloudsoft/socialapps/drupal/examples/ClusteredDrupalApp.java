@@ -16,7 +16,9 @@ import brooklyn.entity.basic.AbstractApplication;
 import brooklyn.entity.basic.BasicConfigurableEntityFactory;
 import brooklyn.entity.basic.ConfigurableEntityFactory;
 import brooklyn.entity.database.mysql.MySqlNode;
+import brooklyn.entity.database.mysql.MySqlNodeImpl;
 import brooklyn.entity.webapp.ControlledDynamicWebAppCluster;
+import brooklyn.entity.webapp.ControlledDynamicWebAppClusterImpl;
 import brooklyn.entity.webapp.WebAppService;
 import brooklyn.launcher.BrooklynLauncher;
 import brooklyn.launcher.BrooklynServerDetails;
@@ -40,12 +42,12 @@ public class ClusteredDrupalApp extends AbstractApplication {
             "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON drupal.* TO 'drupal'@'%'  IDENTIFIED BY 'password'; " +
             "FLUSH PRIVILEGES;";
 
-    private final MySqlNode mySqlNode;
+    private final MySqlNodeImpl mySqlNode;
     private final ControlledDynamicWebAppCluster cluster;
 
     public ClusteredDrupalApp() {
         Map mysqlConf = MutableMap.of("creationScriptContents", SCRIPT);
-        mySqlNode = new MySqlNode(mysqlConf, this);
+        mySqlNode = new MySqlNodeImpl(mysqlConf, this);
         mySqlNode.setConfig(MySqlNode.SUGGESTED_VERSION, "5.5.29");
 
         ConfigurableEntityFactory<Drupal> drupalFactory = new BasicConfigurableEntityFactory<Drupal>(Drupal.class);
@@ -58,7 +60,7 @@ public class ClusteredDrupalApp extends AbstractApplication {
         drupalFactory.setConfig(Drupal.ADMIN_EMAIL, "foo@bar.com");
 
         Map clusterProps = MutableMap.of("factory", drupalFactory, "initialSize", 2);
-        cluster = new ControlledDynamicWebAppCluster(clusterProps, this);
+        cluster = new ControlledDynamicWebAppClusterImpl(clusterProps, this);
         SensorPropagatingEnricher.newInstanceListeningTo(cluster, WebAppService.ROOT_URL).addToEntityAndEmitAll(this);
     }
 
