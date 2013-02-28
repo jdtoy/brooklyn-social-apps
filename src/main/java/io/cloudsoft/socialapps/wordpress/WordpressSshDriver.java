@@ -17,8 +17,19 @@ import brooklyn.location.basic.SshMachineLocation;
 
 public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver implements WordpressDriver {
 
+    // FIXME Only tested on CentOS
+    // e.g. on debian, need to use /etc/init.d/apache2 instead of /etc/init.d/httpd
+    
     // FIXME Some good security advice which we should follow at:
-    //       http://jeffreifman.com/detailed-wordpress-guide-for-aws/install-wordpress/
+    // http://jeffreifman.com/detailed-wordpress-guide-for-aws/install-wordpress/
+    // Also look at DrupalSshDriver. It does some good `chown`, `chgrp` and `chmod`.
+    
+    // FIXME There are other commands at:
+    // http://jeffreifman.com/detailed-wordpress-guide-for-aws/install-wordpress/
+    // to do with /etc/apache2/sites-available, `a2ensite wordpress` etc; not doing those currently.
+    
+    // FIXME Haven't set up email-server, so admin e-mails are not sent
+    // See debian-specific postfix setup in DrupalSshDriver.
     
     private String expandedInstallDir;
 
@@ -48,13 +59,12 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
         
         List<String> commands = new LinkedList<String>();
         
-        //sudo apt-get install php5 libapache2-mod-php5 libapache2-mod-auth-mysql php5-mysql
-        
         commands.add(installPackage(of("yum", "httpd", "apt", "apache2"), null));
         commands.add(installPackage(of("yum", "php", "apt", "php5"), null));
         commands.add(installPackage(of("yum", "php-mysql", "apt", "php5-mysql"), null));
         commands.add(installPackage(of("yum", "php-gd", "apt", "php5-gd"), null));
         commands.add(installPackage(of("apt", "libapache2-mod-php5"), null));
+        commands.add(installPackage(of("apt", "libapache2-mod-auth-mysql"), null));
         
         commands.addAll(CommonCommands.downloadUrlAs(urls, saveAs));
         commands.add(CommonCommands.INSTALL_TAR);
@@ -81,40 +91,6 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
         String destinationCustomInstallFile = format("/tmp/custom-install.php", getWwwDir());
         getMachine().copyTo(new ByteArrayInputStream(customInstallFileContents.getBytes()), destinationCustomInstallFile);
 
-//      commands.add(sudo("cp sites/default/default.settings.php sites/default/settings.php"));
-//      commands.add(sudo("mkdir -p /var/www/sites/default/files"));
-//      commands.add(sudo("chmod o+w sites/default/settings.php"));
-//      commands.add(sudo("chmod o+w sites/default"));
-//      commands.add(sudo("chown -R www-data.www-data /var/www"));
-//      commands.add(sudo("chgrp -R www-data /var/www/sites/default/files"));
-//      commands.add(sudo("chmod -R g+u /var/www/sites/default/files"));
-//      commands.add(sudo("rm index.html"));
-//      commands.add("set HOSTNAME = 'hostname'");
-//      commands.add(sudo("sed -i.bk s/HOST_NAME/$HOSTNAME/g /etc/postfix/main.cf"));
-//      commands.add("set DEBIAN_FRONTEND='noninteractive'");
-//      commands.add(installPackage(of("apt","postfix"),null));
-
-      // FIXME And this stuff?
-      //cd /etc/apache2/sites-available
-      
-      // FIXME And this stuff?
-      //commands.add(sudo("a2ensite wordpress"));
-      
-//        String setupDrupalScript = new ResourceUtils(WordpressSshDriver.class).getResourceAsString("classpath://io/cloudsoft/socialapps/drupal/setup-drupal.php");
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$site_name", entity.getConfig(Drupal.SITE_NAME));
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$site_mail", entity.getConfig(Drupal.SITE_MAIL));
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$admin_name", entity.getConfig(Drupal.ADMIN_NAME));
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$admin_email", entity.getConfig(Drupal.ADMIN_EMAIL));
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$admin_password", entity.getConfig(Drupal.ADMIN_PASSWORD));
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$database_port", "" + entity.getConfig(Drupal.DATABASE_PORT));
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$database_schema", entity.getConfig(Drupal.DATABASE_SCHEMA));
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$database_user", entity.getConfig(Drupal.DATABASE_USER));
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$database_password", entity.getConfig(Drupal.DATABASE_PASSWORD));
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$database_host", entity.getConfig(Drupal.DATABASE_HOST));
-//        setupDrupalScript = setupDrupalScript.replaceAll("\\$database_driver", entity.getConfig(Drupal.DATABASE_DRIVER));
-//
-//        getLocation().copyTo(new ByteArrayInputStream(setupDrupalScript.getBytes()), "/tmp/setup-drupal.php");
-
         List<String> commands = new LinkedList<String>();
         commands.add(sudo(format("mkdir -p %s", getWwwDir())));
         commands.add(sudo(format("cp -R %s/* %s/", getExpandedInstallDir(), getWwwDir())));
@@ -131,14 +107,9 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
     @Override
     public void launch() {
         List<String> commands = new LinkedList<String>();
-//        commands.add(sudo("test -f /etc/init.d/httpd && /etc/init.d/httpd stop"));
-//        commands.add(sudo("test -f /etc/init.d/apache2 && /etc/init.d/apache2 stop"));
         commands.add(sudo("/etc/init.d/httpd stop"));
         commands.add(sudo("/etc/init.d/httpd start"));
         
-        // FIXME Or on debian?
-        //commands.add(sudo("/etc/init.d/apache2 start"));
-
         newScript(LAUNCHING).
                 failOnNonZeroResultCode().
                 body.append(commands).execute();

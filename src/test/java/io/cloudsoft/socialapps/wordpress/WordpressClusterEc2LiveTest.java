@@ -19,6 +19,30 @@ import brooklyn.test.HttpTestUtils;
 
 public class WordpressClusterEc2LiveTest extends AbstractEc2LiveTest {
 
+    /*
+     * FIXME Fails because nginx and wordpress don't play nicely together. It only works if nginx and wordpress are on the same machine:
+     * 
+     * Running this on the VM with nginx (with conf/server.conf pointing at wordpress servers, on port 80:
+     *     $> wget http://localhost:8000
+     *     
+     *     --2013-02-28 11:30:55--  http://localhost:8000/
+     *     Resolving localhost... 127.0.0.1
+     *     Connecting to localhost|127.0.0.1|:8000... connected.
+     *     HTTP request sent, awaiting response... 301 Moved Permanently
+     *     Location: http://localhost/ [following]
+     *     --2013-02-28 11:30:55--  http://localhost/
+     *     Connecting to localhost|127.0.0.1|:80... failed: Connection refused.
+     * 
+     * Various blogs talk about setting up fastcgi_pass in the nginx config, but trying that manually
+     * it still doesn't work if nginx and wordpress are on different machines.
+     *     e.g. http://elasticdog.com/2008/02/howto-install-wordpress-on-nginx/
+     * 
+     * Fix is to include the following in the location info (see http://zeroturnaround.com/labs/wordpress-protips-go-with-a-clustered-approach/#!/):
+     *     proxy_set_header Host $host;
+     *     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+     *     proxy_set_header X-Real-IP $remote_addr;
+     */
+    
     final static String SCRIPT = "create database wordpress; " +
             "grant all privileges on wordpress.* TO 'wordpress'@'localhost'  IDENTIFIED BY 'password'; " +
             "grant all privileges on wordpress.* TO 'wordpress'@'127.0.0.1'  IDENTIFIED BY 'password'; " +
@@ -57,13 +81,7 @@ public class WordpressClusterEc2LiveTest extends AbstractEc2LiveTest {
         }
     }
 
-    @Override
-    @AfterMethod(alwaysRun = true)
-    public void tearDown() throws Exception {
-//        super.tearDown(); // FIXME
-        // no-op; leave it running for debugging
-    }
-    
+    // Convenience for easily running just this one test from Eclipse
     @Override
     @Test(groups = {"Live"})
     public void test_CentOS_6_3() throws Exception {

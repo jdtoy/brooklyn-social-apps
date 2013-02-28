@@ -40,6 +40,7 @@ public class WordpressEc2LiveTest extends AbstractEc2LiveTest {
         HttpTestUtils.assertContentEventuallyContainsText(wordpressUrl, "my custom title");
     }
 
+    // Convenience for easily running just this one test from Eclipse
     @Override
     @Test(groups = {"Live"})
     public void test_CentOS_6_3() throws Exception {
