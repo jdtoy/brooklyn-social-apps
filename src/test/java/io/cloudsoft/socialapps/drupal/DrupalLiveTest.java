@@ -13,11 +13,10 @@ import brooklyn.entity.basic.Entities;
 import brooklyn.entity.database.mysql.MySqlNode;
 import brooklyn.entity.proxying.BasicEntitySpec;
 import brooklyn.location.Location;
-import brooklyn.management.ManagementContext;
 import brooklyn.test.HttpTestUtils;
 import brooklyn.test.entity.TestApplication;
 
-public class DrupalTest {
+public class DrupalLiveTest {
 
     private final static String SCRIPT = "create database drupal; " +
             "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON drupal.* TO 'drupal'@'localhost'  IDENTIFIED BY 'password'; " +
