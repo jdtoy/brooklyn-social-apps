@@ -10,7 +10,9 @@ import brooklyn.enricher.basic.SensorPropagatingEnricher;
 import brooklyn.entity.AbstractEc2LiveTest;
 import brooklyn.entity.Entity;
 import brooklyn.entity.database.mysql.MySqlNode;
+import brooklyn.entity.proxy.nginx.NginxController;
 import brooklyn.entity.proxying.BasicEntitySpec;
+import brooklyn.entity.proxying.EntityTypeRegistry;
 import brooklyn.entity.webapp.ControlledDynamicWebAppCluster;
 import brooklyn.entity.webapp.WebAppService;
 import brooklyn.event.basic.DependentConfiguration;
@@ -52,7 +54,17 @@ public class WordpressClusterEc2LiveTest extends AbstractEc2LiveTest {
     private ControlledDynamicWebAppCluster cluster;
 
     @Override
+    @AfterMethod(alwaysRun = true)
+    public void tearDown() throws Exception {
+        // TODO Auto-generated method stub
+        //super.tearDown();
+    }
+    
+    @Override
     protected void doTest(Location loc) throws Exception {
+        EntityTypeRegistry typeRegistry = app.getManagementContext().getEntityManager().getEntityTypeRegistry();
+        typeRegistry.registerImplementation(NginxController.class, CustomNginxControllerImpl.class);
+        
         MySqlNode mysql = app.createAndManageChild(BasicEntitySpec.newInstance(MySqlNode.class)
                 .configure("creationScriptContents", SCRIPT));
 
@@ -71,14 +83,14 @@ public class WordpressClusterEc2LiveTest extends AbstractEc2LiveTest {
         SensorPropagatingEnricher.newInstanceListeningTo(cluster, WebAppService.ROOT_URL).addToEntityAndEmitAll(cluster);
 
         app.start(Arrays.asList(loc));
-
-        String rootUrl = cluster.getAttribute(Wordpress.ROOT_URL);
-        HttpTestUtils.assertContentEventuallyContainsText(rootUrl, "my custom title");
         
         for (Entity wordpress : cluster.getCluster().getMembers()) {
             String wordpressUrl = wordpress.getAttribute(Wordpress.ROOT_URL);
             HttpTestUtils.assertContentEventuallyContainsText(wordpressUrl, "my custom title");
         }
+
+        String rootUrl = cluster.getAttribute(Wordpress.ROOT_URL);
+        HttpTestUtils.assertContentEventuallyContainsText(rootUrl, "my custom title");
     }
 
     // Convenience for easily running just this one test from Eclipse
