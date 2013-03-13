@@ -2,11 +2,13 @@ package io.cloudsoft.socialapps.wordpress;
 
 
 import static brooklyn.entity.basic.lifecycle.CommonCommands.installPackage;
+import static brooklyn.entity.basic.lifecycle.CommonCommands.alternatives;
 import static brooklyn.entity.basic.lifecycle.CommonCommands.sudo;
 import static com.google.common.collect.ImmutableMap.of;
 import static java.lang.String.format;
 
 import java.io.ByteArrayInputStream;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -60,9 +62,15 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
         List<String> commands = new LinkedList<String>();
         
         commands.add(installPackage(of("yum", "httpd", "apt", "apache2"), null));
-        commands.add(installPackage(of("yum", "php", "apt", "php5"), null));
-        commands.add(installPackage(of("yum", "php-mysql", "apt", "php5-mysql"), null));
-        commands.add(installPackage(of("yum", "php-gd", "apt", "php5-gd"), null));
+        commands.add(alternatives(Arrays.asList(
+                installPackage(of("yum", "php53", "apt", "php5"), null),
+                installPackage("php")), "php/php53 not available"));
+        commands.add(alternatives(Arrays.asList(
+                installPackage(of("yum", "php53-mysql", "apt", "php5-mysql"), null),
+                installPackage("php-mysql")), "php/php53 mysql not available"));
+        commands.add(alternatives(Arrays.asList(
+                installPackage(of("yum", "php53-gd", "apt", "php5-gd"), null),
+                installPackage("php-gd")), "php/php53 gd not available"));
         commands.add(installPackage(of("apt", "libapache2-mod-php5"), null));
         commands.add(installPackage(of("apt", "libapache2-mod-auth-mysql"), null));
         
