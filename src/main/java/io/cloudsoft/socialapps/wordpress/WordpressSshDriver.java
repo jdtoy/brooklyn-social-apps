@@ -122,6 +122,7 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
                 "Order Deny,Allow\n" +
                 "Deny from all\n" +
                 "Allow from localhost\n" +
+                "Allow from 127.0.0.1\n" +
                 "</Location>\n";
         commands.add(format("sed 's/^#ExtendedStatus On/ExtendedStatus On/' %s > %s", httpdConfFile, httpdConfTempFile));
         
