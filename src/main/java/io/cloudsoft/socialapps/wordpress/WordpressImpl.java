@@ -191,4 +191,9 @@ public class WordpressImpl extends SoftwareProcessImpl implements Wordpress {
             EntityUtils.consume(httpResponse.getEntity());
         }
 	}
+
+    @Override
+    public String getShortName() {
+        return "wordpress-httpd";
+    }
 }

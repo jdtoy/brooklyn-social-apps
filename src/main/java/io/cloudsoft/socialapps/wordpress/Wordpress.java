@@ -4,6 +4,7 @@ import brooklyn.config.ConfigKey;
 import brooklyn.entity.basic.Attributes;
 import brooklyn.entity.basic.SoftwareProcess;
 import brooklyn.entity.proxying.ImplementedBy;
+import brooklyn.entity.trait.HasShortName;
 import brooklyn.entity.webapp.WebAppService;
 import brooklyn.event.basic.BasicAttributeSensorAndConfigKey;
 import brooklyn.event.basic.BasicConfigKey;
@@ -12,7 +13,7 @@ import brooklyn.util.flags.SetFromFlag;
 import brooklyn.util.text.Identifiers;
 
 @ImplementedBy(WordpressImpl.class)
-public interface Wordpress extends SoftwareProcess, WebAppService {
+public interface Wordpress extends SoftwareProcess, WebAppService, HasShortName {
 
     @SetFromFlag("version")
     BasicConfigKey<String> SUGGESTED_VERSION = new BasicConfigKey<String>(

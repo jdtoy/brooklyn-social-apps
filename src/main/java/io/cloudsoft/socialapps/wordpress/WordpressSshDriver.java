@@ -55,10 +55,10 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
 	
     @Override
     public void install() {
-        DownloadResolver resolver = entity.getManagementContext().getEntityDownloadsRegistry().resolve(this);
+        DownloadResolver resolver = entity.getManagementContext().getEntityDownloadsManager().newDownloader(this);
         List<String> urls = resolver.getTargets();
         String saveAs = resolver.getFilename();
-        expandedInstallDir = getInstallDir()+"/"+resolver.getUnpackedDirectorName("wordpress");
+        expandedInstallDir = getInstallDir()+"/"+resolver.getUnpackedDirectoryName("wordpress");
         
         List<String> commands = new LinkedList<String>();
         
