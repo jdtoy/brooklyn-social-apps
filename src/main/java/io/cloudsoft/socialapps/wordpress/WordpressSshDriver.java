@@ -4,6 +4,7 @@ package io.cloudsoft.socialapps.wordpress;
 import static brooklyn.entity.basic.lifecycle.CommonCommands.installPackage;
 import static brooklyn.entity.basic.lifecycle.CommonCommands.alternatives;
 import static brooklyn.entity.basic.lifecycle.CommonCommands.sudo;
+import static brooklyn.entity.basic.lifecycle.CommonCommands.ok;
 import static com.google.common.collect.ImmutableMap.of;
 import static java.lang.String.format;
 
@@ -73,6 +74,9 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
                 installPackage("php-gd")), "php/php53 gd not available"));
         commands.add(installPackage(of("apt", "libapache2-mod-php5"), null));
         commands.add(installPackage(of("apt", "libapache2-mod-auth-mysql"), null));
+        
+        // as per willomitzer comment at http://googolflex.com/?p=482 (only needed if selinux is on this box)
+        commands.add(ok(sudo("setsebool -P httpd_can_network_connect 1")));
         
         commands.addAll(CommonCommands.downloadUrlAs(urls, saveAs));
         commands.add(CommonCommands.INSTALL_TAR);
