@@ -9,6 +9,7 @@ import static com.google.common.collect.ImmutableMap.of;
 import static java.lang.String.format;
 
 import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,7 @@ import brooklyn.entity.basic.AbstractSoftwareProcessSshDriver;
 import brooklyn.entity.basic.lifecycle.CommonCommands;
 import brooklyn.entity.drivers.downloads.DownloadResolver;
 import brooklyn.location.basic.SshMachineLocation;
+import brooklyn.util.ResourceUtils;
 
 public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver implements WordpressDriver {
 
@@ -133,16 +135,23 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
 				"END_CONF_"+entity.getId()+"\n");
         
         commands.add(sudo(format("cp %s %s", httpdConfTempFile, httpdConfFile)));
+
+        // start it -- as customizing plugins requires this
+        commands.add(sudo("/etc/init.d/httpd restart"));
         
         newScript(CUSTOMIZING).
                 failOnNonZeroResultCode().
                 body.append(commands).execute();
+        
+        if (entity.getConfig(Wordpress.USE_W3_TOTAL_CACHE) == Boolean.TRUE) {
+            log.info("Activating W3 Total Cache for "+entity);
+            addW3TotalCache();
+        }
     }
 
     @Override
     public void launch() {
         List<String> commands = new LinkedList<String>();
-        commands.add(sudo("/etc/init.d/httpd stop"));
         commands.add(sudo("/etc/init.d/httpd start"));
         
         newScript(LAUNCHING).
@@ -167,5 +176,82 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
         newScript(STOPPING).
                 failOnNonZeroResultCode().
                 body.append(commands).execute();
+    }
+    
+    public void addW3TotalCache() {
+        try {
+            String name = "w3-total-cache";
+            String version = "0.9.2.8";
+            String filename = name+"."+version+".zip";
+            //        http://downloads.wordpress.org/plugin/w3-total-cache.0.9.2.8.zip
+            String url = "http://downloads.wordpress.org/plugin/"+filename;
+
+            String pluginsDir = getWwwDir() + "/wp-content/plugins/";
+
+            int result = newScript("checking for plugin "+name).body.append("ls "+pluginsDir+name).execute();
+            if (result==0) {
+                log.warn("Detected "+name+" already installed; skipping install and configuration");
+                return;
+            }
+            
+            newScript("installing plugin "+name).
+                failOnNonZeroResultCode().
+                body.append("cd /tmp").
+                body.append(CommonCommands.downloadUrlAs(Arrays.asList(url), filename)).
+                body.append("cd "+pluginsDir).
+                body.append(sudo("unzip /tmp/"+filename)).
+                body.append("rm /tmp/"+filename).
+                execute();
+
+            // TODO /var/www/html is hardcoded in most places below
+
+            // update .htaccess (bash)
+            String configureHtaccessUrl = "classpath://io/cloudsoft/socialapps/wordpress/w3-total-cache/configure-htaccess.sh";
+            getMachine().copyTo(new ResourceUtils(this).getResourceFromUrl(configureHtaccessUrl), "/tmp/"+name+"-configure-htaccess.sh");
+            newScript("updating htaccess for "+name).
+                failOnNonZeroResultCode().
+                body.append(sudo("chmod +x /tmp/"+name+"-configure-htaccess.sh")).
+                body.append(sudo("/tmp/"+name+"-configure-htaccess.sh")).
+                execute();
+
+            // activate the plugin (php code)
+            String activateCodeUrl = "classpath://io/cloudsoft/socialapps/wordpress/wp-activate-plugin.php";
+            String activateApp = new ResourceUtils(this).getResourceAsString(activateCodeUrl);
+            activateApp += "<?php\n\n"+"wp_activate_plugin( '"+name+"/"+name+".php' );"+"\n"+"?>\n";
+            getMachine().copyTo(new StringReader(activateApp), "/tmp/wp-activate-plugin-"+name+".php");
+            newScript("activating plugin for "+name).
+                failOnNonZeroResultCode().
+                body.append(sudo("chmod 777 "+getWwwDir()+"/wp-content")).
+                body.append(sudo("php -f "+"/tmp/wp-activate-plugin-"+name+".php")).
+                execute();
+
+            // TODO more hardcoded values in following files
+            // (easy to make e.g. settings a config key, however, so user can set their favourite settings)
+
+            // apply settings (use DB CACHE by default)
+            // need: define('WP_CACHE', true); -- should already be in wp-config.php
+            String settingsUrl = "classpath://io/cloudsoft/socialapps/wordpress/w3-total-cache/settings.php";
+            String settings = new ResourceUtils(this).getResourceAsString(settingsUrl);
+            getMachine().copyTo(new StringReader(settings), "/tmp/"+name+"-settings.php");
+            String saveConfigUrl = "classpath://io/cloudsoft/socialapps/wordpress/w3-total-cache/save-config.php";
+            String saveConfig = new ResourceUtils(this).getResourceAsString(saveConfigUrl);
+            getMachine().copyTo(new StringReader(saveConfig), "/tmp/"+name+"-save-config.php");
+            newScript("applying settings for "+name).
+                failOnNonZeroResultCode().
+                // ensure this tmp dir has been created
+                body.append(sudo("mkdir -p "+getWwwDir()+"/wp-content/cache/tmp")).
+                // chmod for these files (and i think others recently created)
+                body.append(sudo("chmod -R 777 "+getWwwDir()+"/wp-content")).
+                body.append(sudo("php -f /tmp/"+name+"-save-config.php")).
+                execute();
+
+            // clean up - revert permissions back
+            newScript("cleaning up after activation of "+name).
+                failOnNonZeroResultCode().
+                body.append(sudo("chmod 755 "+getWwwDir()+"/wp-content")).
+                execute();
+        } catch (Exception e) {
+            log.warn("Unable to activate w3-total-cache optimization plugin: "+e, e);
+        }
     }
 }

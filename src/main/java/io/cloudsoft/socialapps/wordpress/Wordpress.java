@@ -68,7 +68,15 @@ public interface Wordpress extends SoftwareProcess, WebAppService, HasShortName 
     @SetFromFlag("isWeblogPublic")
     ConfigKey<Boolean> IS_WEBLOG_PUBLIC = new BasicConfigKey<Boolean>(
             Boolean.class, "wordpress.weblog.ispublic", "Whether the weblog is public", true);
-    
+
+    @SetFromFlag("weblogDbCache")
+    ConfigKey<Boolean> WEBLOG_DB_CACHE = new BasicConfigKey<Boolean>(
+            Boolean.class, "wordpress.weblog.db.cache", "Whether the DB cache is turned on", null);
+
+    @SetFromFlag("useW3TotalCache")
+    ConfigKey<Boolean> USE_W3_TOTAL_CACHE = new BasicConfigKey<Boolean>(
+            Boolean.class, "wordpress.w3.total.cache", "Whether W3 Total Cache (optimization) is enabled (recommended)", false);
+
     @SetFromFlag("httpPort")
     PortAttributeSensorAndConfigKey HTTP_PORT = new PortAttributeSensorAndConfigKey(Attributes.HTTP_PORT, "80");
 }
