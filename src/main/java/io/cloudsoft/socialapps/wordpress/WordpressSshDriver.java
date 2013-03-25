@@ -245,11 +245,13 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
                 body.append(sudo("php -f /tmp/"+name+"-save-config.php")).
                 execute();
 
-            // clean up - revert permissions back
-            newScript("cleaning up after activation of "+name).
-                failOnNonZeroResultCode().
-                body.append(sudo("chmod 755 "+getWwwDir()+"/wp-content")).
-                execute();
+            // TODO this seems to happen too soon in some installs; a sleep might work,
+            // but there's no real need assuming the machine is properly secured
+//            // clean up - revert permissions back
+//            newScript("cleaning up after activation of "+name).
+//                failOnNonZeroResultCode().
+//                body.append(sudo("chmod 755 "+getWwwDir()+"/wp-content")).
+//                execute();
         } catch (Exception e) {
             log.warn("Unable to activate w3-total-cache optimization plugin: "+e, e);
         }

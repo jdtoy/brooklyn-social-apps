@@ -55,7 +55,7 @@ public class BasicWordpressApp extends ApplicationBuilder {
                 .configure(Wordpress.DATABASE_NAME, "wordpress")
                 .configure(Wordpress.DATABASE_USER, "wordpress")
                 .configure(Wordpress.DATABASE_PASSWORD, "password")
-                .configure(Wordpress.WEBLOG_TITLE, "Welcome to Brooklyn-installed WordPress!")
+                .configure(Wordpress.WEBLOG_TITLE, "Welcome to WordPress, installed by Brooklyn!")
                 .configure(Wordpress.WEBLOG_ADMIN_EMAIL, EMAIL)
                 .configure(Wordpress.WEBLOG_ADMIN_PASSWORD, PASSWORD)
                 .configure(Wordpress.USE_W3_TOTAL_CACHE, true)
