@@ -242,7 +242,10 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
                 body.append(sudo("mkdir -p "+getWwwDir()+"/wp-content/cache/tmp")).
                 // chmod for these files (and i think others recently created)
                 body.append(sudo("chmod -R 777 "+getWwwDir()+"/wp-content")).
+                body.append(sudo("chown -R root:root "+getWwwDir()+"/wp-content")).
                 body.append(sudo("php -f /tmp/"+name+"-save-config.php")).
+                body.append(sudo("chmod -R 777 "+getWwwDir()+"/wp-content")).
+                body.append(sudo("chown -R root:root "+getWwwDir()+"/wp-content")).
                 execute();
 
             // TODO this seems to happen too soon in some installs; a sleep might work,
