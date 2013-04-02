@@ -47,7 +47,7 @@ public class ClusteredDrupalApp extends ApplicationBuilder {
 
     @Override
     protected void doBuild() {
-        createChild(BasicEntitySpec.newInstance(MySqlNode.class)
+        mySqlNode = createChild(BasicEntitySpec.newInstance(MySqlNode.class)
                 .configure(MySqlNode.CREATION_SCRIPT_CONTENTS, SCRIPT));
 
         EntitySpec<Drupal> drupalSpec = BasicEntitySpec.newInstance(Drupal.class)
@@ -57,7 +57,7 @@ public class ClusteredDrupalApp extends ApplicationBuilder {
                 .configure(Drupal.DATABASE_SCHEMA, "drupal")
                 .configure(Drupal.DATABASE_USER, "drupal")
                 .configure(Drupal.DATABASE_PASSWORD, "password")
-                .configure(Drupal.ADMIN_EMAIL, "foo@bar.com");
+                .configure(Drupal.ADMIN_EMAIL, "foo@example.com");
 
         cluster = createChild(BasicEntitySpec.newInstance(ControlledDynamicWebAppCluster.class)
                 .configure(ControlledDynamicWebAppCluster.MEMBER_SPEC, drupalSpec)

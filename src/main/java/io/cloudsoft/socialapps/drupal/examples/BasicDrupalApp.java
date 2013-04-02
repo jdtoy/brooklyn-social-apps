@@ -32,7 +32,8 @@ public class BasicDrupalApp extends ApplicationBuilder {
     public static final Logger log = LoggerFactory.getLogger(BasicDrupalApp.class);
 
     private final static String SCRIPT = "create database drupal; " +
-            "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON drupal.* TO 'drupal'@'127.0.0.1'  IDENTIFIED BY 'password'; " +
+            "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON drupal.* " +
+            "TO 'drupal'@'%' IDENTIFIED BY 'password'; " +
             "FLUSH PRIVILEGES;";
 
     private Drupal drupal;
@@ -40,17 +41,17 @@ public class BasicDrupalApp extends ApplicationBuilder {
 
     @Override
     protected void doBuild() {
-        createChild(BasicEntitySpec.newInstance(MySqlNode.class)
+        mySqlNode = createChild(BasicEntitySpec.newInstance(MySqlNode.class)
                 .configure(MySqlNode.CREATION_SCRIPT_CONTENTS, SCRIPT));
 
-        createChild(BasicEntitySpec.newInstance(Drupal.class)
+        drupal = createChild(BasicEntitySpec.newInstance(Drupal.class)
                 .configure(Drupal.DATABASE_UP, attributeWhenReady(mySqlNode, MySqlNode.SERVICE_UP))
                 .configure(Drupal.DATABASE_HOST, attributeWhenReady(mySqlNode, MySqlNode.HOSTNAME))
                 .configure(Drupal.DATABASE_PORT, attributeWhenReady(mySqlNode, MySqlNode.MYSQL_PORT))
                 .configure(Drupal.DATABASE_SCHEMA, "drupal")
                 .configure(Drupal.DATABASE_USER, "drupal")
                 .configure(Drupal.DATABASE_PASSWORD, "password")
-                .configure(Drupal.ADMIN_EMAIL, "foo@bar.com"));
+                .configure(Drupal.ADMIN_EMAIL, "foo@example.com"));
     }
 
     // can start in AWS by running this -- or use brooklyn CLI/REST for most clouds, or programmatic/config for set of fixed IP machines
