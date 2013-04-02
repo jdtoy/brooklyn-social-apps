@@ -180,6 +180,10 @@ public class WordpressSshDriver extends AbstractSoftwareProcessSshDriver impleme
     
     public void addW3TotalCache() {
         try {
+            
+            // TOOD see aled's suggested better way using download manager,
+            // in comment at:  https://github.com/cloudsoft/brooklyn-social-apps/pull/9
+                
             String name = "w3-total-cache";
             String version = "0.9.2.8";
             String filename = name+"."+version+".zip";
